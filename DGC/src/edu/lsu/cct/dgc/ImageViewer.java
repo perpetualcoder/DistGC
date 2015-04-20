@@ -25,7 +25,7 @@ public class ImageViewer extends JFrame {
 	}
 
 	public void setPic(final String filename) {
-		System.out.println(filename);
+//		System.out.println(filename);
 		File f = new File(filename);
 		while (true) {
 			if (f.exists())
@@ -44,6 +44,7 @@ public class ImageViewer extends JFrame {
 				jLabel.setIcon(imageIcon);
 				jLabel.repaint();
 				SwingUtilities.updateComponentTreeUI(jLabel);
+				jLabel.repaint();
 				System.out.println("pic changed!");
 				break;
 			}
@@ -81,8 +82,8 @@ public class ImageViewer extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("action cleared!" + current + "..."
-						+ Main.pic.size());
+//				System.out.println("action cleared!" + current + "..."
+//						+ Main.pic.size());
 				if (current > 1) {
 					try {
 						image = ImageIO.read(new File(Main.pic.get(--current)));
@@ -98,7 +99,7 @@ public class ImageViewer extends JFrame {
 					jLabel.setIcon(imageIcon);
 					jLabel.repaint();
 					SwingUtilities.updateComponentTreeUI(jLabel);
-					System.out.println("pic changed!");
+//					System.out.println("pic changed!");
 				}
 			}
 		});
@@ -107,8 +108,8 @@ public class ImageViewer extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("action cleared! next" + current + "..."
-						+ Main.pic.size());
+//				System.out.println("action cleared! next" + current + "..."
+//						+ Main.pic.size());
 				if (current < Main.pic.size()) {
 					try {
 						image = ImageIO.read(new File(Main.pic.get(++current)));
@@ -123,13 +124,13 @@ public class ImageViewer extends JFrame {
 					jLabel.setIcon(imageIcon);
 					jLabel.repaint();
 					SwingUtilities.updateComponentTreeUI(jLabel);
-					System.out.println("pic changed!");
+//					System.out.println("pic changed!");
 				}
 			}
 		});
 		ImageIcon imageIcon = new ImageIcon(image);
-
 		jLabel.setIcon(imageIcon);
+		jLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		jLabel.setHorizontalAlignment(JLabel.CENTER);
 		getContentPane().add(jLabel, BorderLayout.CENTER);
 		getContentPane().setBackground(Color.white);
