@@ -5,9 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +25,7 @@ public class Main {
 	public static HashMap<Integer, String> pic = new HashMap<Integer, String>();
 	static String fName;
 	public static int counter = 1;
+	public static int auto=1;
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("Enter the file name:");
@@ -85,13 +88,23 @@ public class Main {
 
 	private static void processConsole(Scanner sc) throws IOException,
 			Exception {
+		
+		String str;
+		if(auto==0){
 		sc = new Scanner(System.in);
 		System.out.println("$>");
-		String str = sc.next();
+		str = sc.next();
+		}
+		else {
+			str="refresh";
+		}
 		Pattern process = Pattern.compile("(\\d)P");
 		Matcher match;
 		System.out.println(str);
 		while (!str.equals("exit")) {
+			if(auto==1){
+				str=pickRandom();
+			}
 			if(str.equals("refresh")) {
 				
 			}
@@ -105,13 +118,23 @@ public class Main {
 			}
 			}
 			display(fName, counter);
+			if(auto!=1) {
 			System.out.println("$>");
 			str = sc.next();
 			System.out.println(str);
+			}
 
 		}
 	}
-
+	private static String pickRandom(){
+		ArrayList<Node> mList=new ArrayList<Node>();
+		for (Entry<Integer, Node> entry : nMap.entrySet()) {
+			if(entry.getValue().qu.size()>0)
+				mList.add(entry.getValue());
+		}
+		Random r = new Random();
+		return String.valueOf(mList.get(r.nextInt(mList.size())).id);
+	}
 	private static void createLink(Matcher matcher) {
 		// System.out.println(matcher.group(1) + ";;;" + matcher.group(2));
 		int from = Integer.parseInt(matcher.group(1));
