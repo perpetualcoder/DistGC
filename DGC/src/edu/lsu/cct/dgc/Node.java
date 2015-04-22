@@ -11,6 +11,8 @@ public class Node {
 	public static final int CD = 2;
 	public static final int TR = 3;
 	public static final int TD = 4;
+	public static final int RS = 5;
+	public static final int R = 6;
 	int id,which;
 	int[] rc = new int[3];
 	int cid;
@@ -57,6 +59,7 @@ public class Node {
 		}
 	}
 	public void processMsg(){
+		System.out.println("processing node"+id);
 		if(!qu.isEmpty()){
 			Msg m = qu.poll();
 			switch(m.type) {
@@ -78,15 +81,165 @@ public class Node {
 			case Msg.DE:
 				processDE(m);
 				break;
+			case Msg.R:
+				processR(m);
+				break;
+			case Msg.RR:
+				processRR(m);
+				break;
+			case Msg.RD:
+				processRD(m);
+				break;
 			}
+			
 		}
 		
 	}
+	public void processRD(Msg m){
+		if(m.cid==cid) {
+			msgsent--;
+			if(msgsent==0){
+				if(state==RS){
+					Msg mn = new Msg(Msg.TD);
+					mn.from=id;
+					mn.to=parent;
+					Main.nMap.get(mn.to).qu.add(mn);
+				}
+				else if(state==R){
+					if(parent!=id){
+						Msg mn = new Msg(Msg.RD);
+						mn.from=id;
+						mn.to=parent;
+						mn.cid=cid;
+						Main.nMap.get(mn.to).qu.add(mn);
+					}
+					else {
+						if(rc[which]>0){
+							System.out.println("send CL msg !");
+						}
+						else {
+							if(outMap.size()>0){
+								for(Integer i:outMap.keySet()){
+									Link l = outMap.get(i);
+									Msg mn = new Msg(Msg.DE);
+									mn.p=1;
+									mn.to=l.to;
+									mn.from=id;
+									mn.parent=id;
+									mn.cid=cid;
+									Node toNode=Main.nMap.get(l.to);
+									toNode.qu.add(mn);
+									outMap.remove(i);
+									
+								}
+							}
+						}
+					}
+				}
+			
+			}
+				
+		}
+	}
+	public void processRR(Msg m){
+		if(outMap.size()>0){
+			for(Integer i:outMap.keySet()){
+				Link l = outMap.get(i);
+				if(l.to==m.from){
+					l.which=m.which;
+					l.p=0;
+					break;
+				}
+				
+			}
+		}
+	}
+	public void processR(Msg m){
+		if((state==CD || state==TD || state==TR) && cid==m.cid){
+			if(rc[which]==0){
+				rc[which]++;
+				rc[2]--;
+				System.out.println("Sent Response!");
+				Msg mn = new Msg(Msg.RR);
+				mn.from=id;
+				mn.to=m.from;
+				mn.which=which;
+				Main.nMap.get(mn.to).qu.add(mn);
+				
+					
+			}
+			else if(rc[2]>0){
+				rc[1-which]++;
+				rc[2]--;
+				Msg mn = new Msg(Msg.RR);
+				mn.from=id;
+				mn.to=m.from;
+				mn.which=which;
+				Main.nMap.get(mn.to).qu.add(mn);
+			}
+			if(parent!=m.from){
+				System.out.println("sent RD msg back");
+				Msg mn = new Msg(Msg.RD);
+				mn.to=m.from;
+				mn.from = id;
+				Main.nMap.get(mn.to).qu.add(mn);
+			}
+			else{
+				state=R;
+				if(outMap.size()>0){
+					for(Integer i:outMap.keySet()){
+						Link l = outMap.get(i);
+						Msg mn = new Msg(Msg.R);
+						mn.which=l.which;
+						mn.to=l.to;
+						mn.from=id;
+						mn.parent=id;
+						mn.cid=cid;
+						Node toNode=Main.nMap.get(l.to);
+						toNode.qu.add(mn);
+						msgsent++;
+					}
+				}
+				else {
+					Msg mn = new Msg(Msg.RD);
+					mn.from=id;
+					mn.to=parent;
+					mn.cid=cid;
+					Main.nMap.get(mn.to).qu.add(mn);
+				}
+			}
+		}
+		else if((state==R || state==RS)){
+			 if(rc[2]>0){
+					state=R;
+					rc[1-which]++;
+					rc[2]--;
+					Msg mn = new Msg(Msg.RR);
+					mn.from=id;
+					mn.to=m.from;
+					mn.which=1-which;
+					Main.nMap.get(mn.to).qu.add(mn);
+					Msg mnr = new Msg(Msg.RD);
+					mnr.from=id;
+					mnr.to=parent;
+					mnr.cid=cid;
+					Main.nMap.get(mnr.to).qu.add(mnr);
+				}
+			 else {
+				 Msg mn = new Msg(Msg.RD);
+					mn.from=id;
+					mn.to=parent;
+					mn.cid=cid;
+					Main.nMap.get(mn.to).qu.add(mn);
+			 }
+		}
+	}
+	
 	public void processDE(Msg m){
 		if(m.cid==cid){
 			if(m.p==1)
 				rc[2]--;
-			if(rc[which]==0 && rc[1-which]==0 && rc[2]==0){
+			if(rc[which]==0 && rc[1-which]==0){
 				if(outMap.size()>0){
 					for(Integer i:outMap.keySet()){
 						Link l = outMap.get(i);
@@ -98,12 +251,14 @@ public class Node {
 						mn.cid=cid;
 						Node toNode=Main.nMap.get(l.to);
 						toNode.qu.add(mn);
-						outMap.remove(i);
 						
 					}
+					outMap.clear();
 				}
-				d=1;
+				if(rc[2]==0)
+					d=1;
 			}
+			
 		}
 	}
 	public void processTD(Msg m){
@@ -113,6 +268,21 @@ public class Node {
 				if(parent==id){
 					if(rc[which]>0){
 						System.out.println("recovery!!!");
+						state=R;
+						if(outMap.size()>0){
+							for(Integer i:outMap.keySet()){
+								Link l = outMap.get(i);
+								Msg mn = new Msg(Msg.R);
+								mn.which=l.which;
+								mn.to=l.to;
+								mn.from=id;
+								mn.parent=id;
+								mn.cid=cid;
+								Node toNode=Main.nMap.get(l.to);
+								toNode.qu.add(mn);
+								msgsent++;
+							}
+						}
 					}
 					else{
 						System.out.println("Start deleting");
@@ -140,6 +310,29 @@ public class Node {
 				}else{
 					if(rc[which]>0){
 						System.out.println("recovery!");
+						state=RS;
+						if(outMap.size()>0){
+							for(Integer i:outMap.keySet()){
+								Link l = outMap.get(i);
+								Msg mn = new Msg(Msg.R);
+								mn.which=l.which;
+								mn.to=l.to;
+								mn.from=id;
+								mn.parent=id;
+								mn.cid=cid;
+								Node toNode=Main.nMap.get(l.to);
+								toNode.qu.add(mn);
+								msgsent++;
+							}
+						}
+						else {
+							Msg mn = new Msg(Msg.TD);
+							mn.from=id;
+							mn.to=parent;
+							mn.cid=cid;
+							Main.nMap.get(mn.to).qu.add(mn);
+						}
+						
 					}
 					else{
 						Msg mn = new Msg(Msg.TD);
@@ -185,6 +378,29 @@ public class Node {
 		}
 		else if(rc[which]>0 && state==CD && cid==m.cid){
 			System.out.println("recovery procedure!");
+			state=RS;
+			if(outMap.size()>0){
+				for(Integer i:outMap.keySet()){
+					Link l = outMap.get(i);
+					Msg mn = new Msg(Msg.R);
+					mn.which=l.which;
+					mn.to=l.to;
+					mn.from=id;
+					mn.parent=id;
+					mn.cid=cid;
+					Node toNode=Main.nMap.get(l.to);
+					toNode.qu.add(mn);
+					msgsent++;
+				}
+			}
+			else {
+				Msg mn = new Msg(Msg.TD);
+				mn.from=id;
+				mn.to=parent;
+				mn.cid=cid;
+				Main.nMap.get(mn.to).qu.add(mn);
+			}
+			
 		}
 	}
 	private void processCD(Msg m) {
@@ -265,6 +481,7 @@ public class Node {
 		}
 		else {
 			if(rc[1-which]>0){
+				System.out.println("changing weak to strong");
 				which=1-which;
 			}
 			if(outMap.size()>0){

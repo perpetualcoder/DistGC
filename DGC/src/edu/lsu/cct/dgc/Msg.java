@@ -7,6 +7,9 @@ public class Msg {
 	public static final int TR = 3;
 	public static final int TD = 4;
 	public static final int DE = 5;
+	public static final int R = 6;
+	public static final int RR = 7;
+	public static final int RD = 8;
 	int type;
 	int from,to;
 	int which;

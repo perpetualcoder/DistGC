@@ -25,7 +25,7 @@ public class Main {
 	public static HashMap<Integer, String> pic = new HashMap<Integer, String>();
 	static String fName;
 	public static int counter = 1;
-	public static int auto=1;
+	public static int auto=0;
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("Enter the file name:");
@@ -104,6 +104,9 @@ public class Main {
 		while (!str.equals("exit")) {
 			if(auto==1){
 				str=pickRandom();
+				if(str==null)
+					break;
+				str=str+"P";
 			}
 			if(str.equals("refresh")) {
 				
@@ -133,7 +136,12 @@ public class Main {
 				mList.add(entry.getValue());
 		}
 		Random r = new Random();
-		return String.valueOf(mList.get(r.nextInt(mList.size())).id);
+		
+		if(mList.size()>0){
+			int x = r.nextInt(mList.size());
+			return String.valueOf(mList.get(x).id);
+		}
+		return null;
 	}
 	private static void createLink(Matcher matcher) {
 		// System.out.println(matcher.group(1) + ";;;" + matcher.group(2));
@@ -180,6 +188,7 @@ public class Main {
 		}
 		wr.println("}");
 		wr.close();
+	
 		String cmd = dotlocation + "-Tjpg " + theDir.getAbsolutePath() + "\\"
 				+ str + "_gv" + count + ".gv " + "-o "
 				+ theDir.getAbsolutePath() + "\\" + str + "_gv" + count
@@ -198,6 +207,7 @@ public class Main {
 			if (picf.exists())
 				break;
 		}
+		
 		pic.remove(count-1);
 		pic.put(count, theDir.getAbsolutePath() + "\\" + str + "_gv" + count
 				+ ".jpg");
@@ -228,7 +238,7 @@ public class Main {
 					wr.println(from + "->" + to + ";");
 					wr.println("edge [color=black];");
 				} else {
-					if (n.which == i.which) {
+					if (i.which == nMap.get(i.to).which) {
 						wr.println(from + "->" + to + ";");
 					} else {
 						wr.println(from + "->" + to + "[style=dotted];");
