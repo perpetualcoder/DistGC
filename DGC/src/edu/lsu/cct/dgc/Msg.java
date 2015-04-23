@@ -10,6 +10,7 @@ public class Msg {
 	public static final int R = 6;
 	public static final int RR = 7;
 	public static final int RD = 8;
+	public static final int CL = 9;
 	int type;
 	int from,to;
 	int which;

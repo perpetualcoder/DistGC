@@ -57,6 +57,11 @@ public class Node {
 			toNode.qu.add(m);
 			
 		}
+		if(cid==toNode.cid){
+			Link l = outMap.get(to);
+			outMap.remove(to);
+			stash.add(l);
+		}
 	}
 	public void processMsg(){
 		System.out.println("processing node"+id);
@@ -90,10 +95,33 @@ public class Node {
 			case Msg.RD:
 				processRD(m);
 				break;
+			case Msg.CL:
+				processCL(m);
+				break;
 			}
 			
 		}
 		
+	}
+	public void processCL(Msg m){
+		if(m.cid==cid){
+			state=CL;
+			System.out.println("CL msgs are tranfered to id");
+			cid=-1;
+			parent=-1;
+			if(outMap.size()>0){
+				for(Integer i:outMap.keySet()){
+					Link l = outMap.get(i);
+					Msg mn = new Msg(Msg.CL);
+					mn.to=l.to;
+					mn.from=id;
+					mn.cid=m.cid;
+					Node toNode=Main.nMap.get(l.to);
+					toNode.qu.add(mn);
+				}
+			}
+			
+		}
 	}
 	public void processRD(Msg m){
 		if(m.cid==cid) {
@@ -115,7 +143,10 @@ public class Node {
 					}
 					else {
 						if(rc[which]>0){
-							System.out.println("send CL msg !");
+							Msg mn = new Msg(Msg.CL);
+							mn.cid=cid;
+							mn.to=id;
+							qu.add(mn);
 						}
 						else {
 							if(outMap.size()>0){

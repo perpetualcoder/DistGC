@@ -25,7 +25,7 @@ public class Main {
 	public static HashMap<Integer, String> pic = new HashMap<Integer, String>();
 	static String fName;
 	public static int counter = 1;
-	public static int auto=0;
+	public static int auto=1;
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("Enter the file name:");
@@ -223,6 +223,7 @@ public class Main {
 		if (nMap.get(n.id).qu.size() > 0) {
 			from = "\"" + from + "M\"";
 		}
+		
 		for (Link i : n.outMap.values()) {
 			
 			String to = String.valueOf(i.to);
