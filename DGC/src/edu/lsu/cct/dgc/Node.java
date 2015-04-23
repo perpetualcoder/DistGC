@@ -33,15 +33,17 @@ public class Node {
 	}
 	public void addLink(Node toNode,int to){
 		int from = id;
-		if(toNode.outMap.size()>0){
-			toNode.rc[1-toNode.which]++;
-			Link l = new Link(to,1-toNode.which);
-			Main.nMap.get(from).outMap.put(to,l);
-		}
-		else{
+		
+		if(toNode.rc[which]==0 || toNode.outMap.size()==0){
 			toNode.rc[toNode.which]++;
 			Link l = new Link(to,toNode.which);
 			Main.nMap.get(from).outMap.put(to,l);
+		}
+		else {
+				toNode.rc[1-toNode.which]++;
+				Link l = new Link(to,1-toNode.which);
+				Main.nMap.get(from).outMap.put(to,l);
+			
 		}
 		
 	}
@@ -61,6 +63,44 @@ public class Node {
 			Link l = outMap.get(to);
 			outMap.remove(to);
 			stash.add(l);
+		}
+		else{
+			Msg m = new Msg(Msg.DL);
+			Link l = outMap.get(to);
+			outMap.remove(to);
+			m.which=l.which;
+			m.p=l.p;
+			m.to=l.to;
+			m.cid=cid;
+			toNode.qu.add(m);
+		}
+	}
+	public void deleteStashLink(int to){
+		Node toNode=Main.nMap.get(to);
+		if(state==CL && toNode.state==CL ){
+			Msg m = new Msg(Msg.DL);
+			Link l = outMap.get(to);
+			outMap.remove(to);
+			m.which=l.which;
+			m.p=l.p;
+			m.to=l.to;
+			toNode.qu.add(m);
+			
+		}
+		if(cid==toNode.cid){
+			Link l = outMap.get(to);
+			outMap.remove(to);
+			stash.add(l);
+		}
+		else{
+			Msg m = new Msg(Msg.DL);
+			Link l = outMap.get(to);
+			outMap.remove(to);
+			m.which=l.which;
+			m.p=l.p;
+			m.to=l.to;
+			m.cid=cid;
+			toNode.qu.add(m);
 		}
 	}
 	public void processMsg(){
@@ -119,6 +159,26 @@ public class Node {
 					Node toNode=Main.nMap.get(l.to);
 					toNode.qu.add(mn);
 				}
+			}
+			if(stash.size()>0){
+				for(Link l : stash){
+					Msg mn = new Msg(Msg.CL);
+					mn.to=l.to;
+					mn.from=id;
+					mn.cid=m.cid;
+					Node toNode=Main.nMap.get(l.to);
+					toNode.qu.add(mn);
+					Msg mt = new Msg(Msg.DL);
+					Link lt = l;
+					outMap.remove(lt.to);
+					mt.which=lt.which;
+					mt.p=lt.p;
+					mt.to=lt.to;
+					toNode.qu.add(mt);
+					
+				}
+				stash.clear();
+				
 			}
 			
 		}
@@ -572,6 +632,17 @@ public class Node {
 				}
 				
 			}
+		}
+		else if(state==CO || state==CD){
+			if(m.which==which){
+				rc[which]--;
+			}
+			else{
+				rc[1-which]--;
+			}
+		}
+		else if(state==TR || state==TD){
+			qu.add(m);
 		}
 	}
 

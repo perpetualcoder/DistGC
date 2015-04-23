@@ -25,14 +25,26 @@ public class Main {
 	public static HashMap<Integer, String> pic = new HashMap<Integer, String>();
 	static String fName;
 	public static int counter = 1;
-	public static int auto=1;
-
+	public static int auto = 0;
+	public static boolean deleteDir(File dir) {
+	    if (dir.isDirectory()) {
+	        String[] children = dir.list();
+	        for (int i=0; i<children.length; i++) {
+	            boolean success = deleteDir(new File(dir, children[i]));
+	            if (!success) {
+	                return false;
+	            }
+	        }
+	    }
+	    return dir.delete();
+	}
 	public static void main(String[] args) throws Exception {
 		System.out.println("Enter the file name:");
 		Scanner sc = new Scanner(System.in);
 		fName = sc.next();
 		File fi = new File(fName);
 		File fo = new File(fName + "-out");
+		deleteDir(fo);
 		sc = new Scanner(fi);
 		nMap.put(0, anchor);
 		Pattern create = Pattern.compile("(\\d)->(\\d)");
@@ -88,61 +100,78 @@ public class Main {
 
 	private static void processConsole(Scanner sc) throws IOException,
 			Exception {
-		
+
 		String str;
-		if(auto==0){
-		sc = new Scanner(System.in);
-		System.out.println("$>");
-		str = sc.next();
-		}
-		else {
-			str="refresh";
+		if (auto == 0) {
+			sc = new Scanner(System.in);
+			System.out.println("$>");
+			str = sc.next();
+		} else {
+			str = "refresh";
 		}
 		Pattern process = Pattern.compile("(\\d)P");
+		Pattern create = Pattern.compile("(\\d)->(\\d)");
+		Pattern delete = Pattern.compile("(\\d)X(\\d)");
 		Matcher match;
 		System.out.println(str);
 		while (!str.equals("exit")) {
-			if(auto==1){
-				str=pickRandom();
-				if(str==null)
+			if (auto == 1) {
+				str = pickRandom();
+				if (str == null)
 					break;
-				str=str+"P";
+				str = str + "P";
 			}
-			if(str.equals("refresh")) {
-				
-			}
-			else {
-			match = process.matcher(str);
-			if (match.find()) {
-				int nodeId = Integer.parseInt(match.group(1));
-				Node n = nMap.get(nodeId);
-				n.processMsg();
+			if (!str.equals("refresh")) {
+				match = process.matcher(str);
+				if (match.find()) {
+					int nodeId = Integer.parseInt(match.group(1));
+					Node n = nMap.get(nodeId);
+					n.processMsg();
 
-			}
+				}
+				match=create.matcher(str);
+				if(match.find()){
+					createLink(match);
+				}
+				match=delete.matcher(str);
+				if(match.find()){
+					int from = Integer.parseInt(match.group(1));
+					int to = Integer.parseInt(match.group(2));
+					if (nMap.containsKey(from)) {
+						if (nMap.containsKey(to)) {
+							Node nFrom = nMap.get(from);
+							if (nFrom.outMap.containsKey(to)) {
+								nFrom.deleteLink(to);
+							}
+						}
+					}
+				}
 			}
 			display(fName, counter);
-			if(auto!=1) {
-			System.out.println("$>");
-			str = sc.next();
-			System.out.println(str);
+			if (auto != 1) {
+				System.out.println("$>");
+				str = sc.next();
+				System.out.println(str);
 			}
 
 		}
 	}
-	private static String pickRandom(){
-		ArrayList<Node> mList=new ArrayList<Node>();
+
+	private static String pickRandom() {
+		ArrayList<Node> mList = new ArrayList<Node>();
 		for (Entry<Integer, Node> entry : nMap.entrySet()) {
-			if(entry.getValue().qu.size()>0)
+			if (entry.getValue().qu.size() > 0)
 				mList.add(entry.getValue());
 		}
 		Random r = new Random();
-		
-		if(mList.size()>0){
+
+		if (mList.size() > 0) {
 			int x = r.nextInt(mList.size());
 			return String.valueOf(mList.get(x).id);
 		}
 		return null;
 	}
+
 	private static void createLink(Matcher matcher) {
 		// System.out.println(matcher.group(1) + ";;;" + matcher.group(2));
 		int from = Integer.parseInt(matcher.group(1));
@@ -188,7 +217,7 @@ public class Main {
 		}
 		wr.println("}");
 		wr.close();
-	
+
 		String cmd = dotlocation + "-Tjpg " + theDir.getAbsolutePath() + "\\"
 				+ str + "_gv" + count + ".gv " + "-o "
 				+ theDir.getAbsolutePath() + "\\" + str + "_gv" + count
@@ -207,8 +236,8 @@ public class Main {
 			if (picf.exists())
 				break;
 		}
-		
-		pic.remove(count-1);
+
+		pic.remove(count - 1);
 		pic.put(count, theDir.getAbsolutePath() + "\\" + str + "_gv" + count
 				+ ".jpg");
 		// for (Entry<Integer, String> entry : pic.entrySet()) {
@@ -223,13 +252,12 @@ public class Main {
 		if (nMap.get(n.id).qu.size() > 0) {
 			from = "\"" + from + "M\"";
 		}
-		
+
 		for (Link i : n.outMap.values()) {
-			
+
 			String to = String.valueOf(i.to);
 			if (nMap.get(i.to).d != 1) {
 
-				
 				if (nMap.get(i.to).qu.size() > 0) {
 					to = "\"" + to + "M\"";
 
@@ -247,8 +275,8 @@ public class Main {
 				}
 			}
 		}
-		if(n.outMap.size()==0){
-			wr.println(from+";");
+		if (n.outMap.size() == 0) {
+			wr.println(from + ";");
 		}
 	}
 }
