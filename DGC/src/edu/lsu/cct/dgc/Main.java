@@ -246,6 +246,7 @@ public class Main {
 	}
 
 	public static void printNode(PrintWriter wr, Node n) {
+		n.print();
 		if (n.d == 1)
 			return;
 		String from = String.valueOf(n.id);
@@ -272,6 +273,23 @@ public class Main {
 					} else {
 						wr.println(from + "->" + to + "[style=dotted];");
 					}
+				}
+			}
+		}
+		if(n.stash.size()>0){
+			for(Link i : n.stash){
+				String to = String.valueOf(i.to);
+				if (nMap.get(i.to).d != 1) {
+
+					if (nMap.get(i.to).qu.size() > 0) {
+						to = "\"" + to + "M\"";
+
+					}
+					
+						wr.println("edge [color=yellow];");
+						wr.println(from + "->" + to + ";");
+						wr.println("edge [color=black];");
+					
 				}
 			}
 		}
