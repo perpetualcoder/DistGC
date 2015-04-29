@@ -20,7 +20,7 @@ public class Main {
 	static int cidcounter = 0;
 	static Node anchor = new Node(0);
 	static HashMap<Integer, Node> nMap = new HashMap<Integer, Node>();
-	static String dotlocation = "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
+	static String dotlocation = "/usr/bin/dot";//"C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
 	static ImageViewer iv;
 	public static HashMap<Integer, String> pic = new HashMap<Integer, String>();
 	static String fName;
@@ -209,7 +209,7 @@ public class Main {
 			// }
 		}
 		// System.out.println(theDir.getAbsolutePath());
-		PrintWriter wr = new PrintWriter(str + "\\" + str + "_gv" + count
+		PrintWriter wr = new PrintWriter(str + File.separatorChar + str + "_gv" + count
 				+ ".gv", "UTF-8");
 		wr.println("Digraph G {");
 		for (Entry<Integer, Node> entry : nMap.entrySet()) {
@@ -218,19 +218,19 @@ public class Main {
 		wr.println("}");
 		wr.close();
 
-		String cmd = dotlocation + "-Tjpg " + theDir.getAbsolutePath() + "\\"
+		String cmd = dotlocation + "-Tjpg " + theDir.getAbsolutePath() + File.separatorChar
 				+ str + "_gv" + count + ".gv " + "-o "
-				+ theDir.getAbsolutePath() + "\\" + str + "_gv" + count
+				+ theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
 				+ ".jpg";
 		// System.out.println(cmd);
 		ProcessBuilder pb = new ProcessBuilder(dotlocation, "-Tjpg",
-				theDir.getAbsolutePath() + "\\" + str + "_gv" + count + ".gv ",
-				"-o", theDir.getAbsolutePath() + "\\" + str + "_gv" + count
+				theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count + ".gv ",
+				"-o", theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
 						+ ".jpg");
 		pb.redirectErrorStream(true);
 		pb.directory(theDir.getAbsoluteFile());
 		Process process = pb.start();
-		File picf = new File(theDir.getAbsolutePath() + "\\" + str + "_gv"
+		File picf = new File(theDir.getAbsolutePath() + File.separatorChar + str + "_gv"
 				+ count + ".jpg");
 		while (true) {
 			if (picf.exists())
@@ -238,7 +238,7 @@ public class Main {
 		}
 
 		pic.remove(count - 1);
-		pic.put(count, theDir.getAbsolutePath() + "\\" + str + "_gv" + count
+		pic.put(count, theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
 				+ ".jpg");
 		// for (Entry<Integer, String> entry : pic.entrySet()) {
 		// System.out.println(entry.getKey() + "->" + entry.getValue());
