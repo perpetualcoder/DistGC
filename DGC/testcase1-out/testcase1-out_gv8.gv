@@ -1,8 +1,0 @@
-Digraph G {
-edge [color=red];
-1->"2M";
-edge [color=black];
-"2M"->3;
-3->4;
-4->1[style=dotted];
-}
