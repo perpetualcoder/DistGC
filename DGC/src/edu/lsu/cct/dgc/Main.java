@@ -228,7 +228,6 @@ public class Main {
 				+ theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
 				+ ".jpg";
 		// System.out.println(cmd);
-    System.out.println("HERE "+new Throwable().getStackTrace()[0]);
 
     String[] pbargs = new String[]{dotlocation,"-Tjpg",
 				theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count + ".gv",
