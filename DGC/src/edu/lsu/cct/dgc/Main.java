@@ -20,7 +20,7 @@ public class Main {
 	static int cidcounter = 0;
 	static Node anchor = new Node(0);
 	static HashMap<Integer, Node> nMap = new HashMap<Integer, Node>();
-	static String dotlocation = "/usr/bin/dot";//"C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
+	static String dotlocation = File.separatorChar == '/' ? "/usr/bin/dot" : "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
 	static ImageViewer iv;
 	public static HashMap<Integer, String> pic = new HashMap<Integer, String>();
 	static String fName;
