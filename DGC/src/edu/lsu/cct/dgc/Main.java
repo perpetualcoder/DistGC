@@ -1,6 +1,7 @@
 package edu.lsu.cct.dgc;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -39,9 +40,14 @@ public class Main {
 	    return dir.delete();
 	}
 	public static void main(String[] args) throws Exception {
-		System.out.println("Enter the file name:");
-		Scanner sc = new Scanner(System.in);
-		fName = sc.next();
+    Scanner sc = null;
+    if(args.length == 0) {
+      System.out.println("Enter the file name:");
+      sc = new Scanner(System.in);
+      fName = sc.next();
+    } else {
+      fName = args[0];
+    }
 		File fi = new File(fName);
 		File fo = new File(fName + "-out");
 		deleteDir(fo);
@@ -83,7 +89,6 @@ public class Main {
 
 	private static void display(String fName, int counter) throws IOException,
 			Exception {
-		// System.out.println("counter"+counter);
 		printer(fName + "-out", counter);
 		if (iv == null) {
 			iv = new ImageViewer(pic.get(counter));
@@ -202,7 +207,7 @@ public class Main {
 				theDir.mkdir();
 				result = true;
 			} catch (SecurityException se) {
-				// handle it
+        se.printStackTrace();
 			}
 			// if (result) {
 			// System.out.println("DIR created");
@@ -223,16 +228,24 @@ public class Main {
 				+ theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
 				+ ".jpg";
 		// System.out.println(cmd);
-		ProcessBuilder pb = new ProcessBuilder(dotlocation, "-Tjpg",
-				theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count + ".gv ",
-				"-o", theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
-						+ ".jpg");
+    System.out.println("HERE "+new Throwable().getStackTrace()[0]);
+
+    String[] pbargs = new String[]{dotlocation,"-Tjpg",
+				theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count + ".gv",
+				"-o", theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count + ".jpg"};
+
+		ProcessBuilder pb = new ProcessBuilder(pbargs);
 		pb.redirectErrorStream(true);
 		pb.directory(theDir.getAbsoluteFile());
 		Process process = pb.start();
 		File picf = new File(theDir.getAbsolutePath() + File.separatorChar + str + "_gv"
 				+ count + ".jpg");
+    InputStream in = process.getInputStream();
+    byte[] buf = new byte[512];
 		while (true) {
+      int n = in.read(buf,0,buf.length);
+      if(n > 0)
+        System.out.write(buf,0,n);
 			if (picf.exists())
 				break;
 		}
