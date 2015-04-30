@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import javax.swing.JFrame;
 
 public class Main {
+  final static String PROMPT = "$> ";
 	static int cidcounter = 0;
 	static Node anchor = new Node(0);
 	static HashMap<Integer, Node> nMap = new HashMap<Integer, Node>();
@@ -109,7 +110,8 @@ public class Main {
 		String str;
 		if (auto == 0) {
 			sc = new Scanner(System.in);
-			System.out.println("$>");
+			System.out.print(PROMPT);
+      System.out.flush();
 			str = sc.next();
 		} else {
 			str = "refresh";
@@ -154,7 +156,8 @@ public class Main {
 			}
 			display(fName, counter);
 			if (auto != 1) {
-				System.out.println("$>");
+				System.out.print(PROMPT);
+        System.out.flush();
 				str = sc.next();
 				System.out.println(str);
 			}
