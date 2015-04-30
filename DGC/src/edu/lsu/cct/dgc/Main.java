@@ -18,6 +18,9 @@ import java.util.regex.Pattern;
 import javax.swing.JFrame;
 
 public class Main {
+	final static Pattern process = Pattern.compile("(\\d)P");
+	final static Pattern create = Pattern.compile("(\\d)->(\\d)");
+	final static Pattern delete = Pattern.compile("(\\d)X(\\d)");
   final static String PROMPT = "$> ";
 	static int cidcounter = 0;
 	static Node anchor = new Node(0);
@@ -54,13 +57,17 @@ public class Main {
 		deleteDir(fo);
 		sc = new Scanner(fi);
 		nMap.put(0, anchor);
-		Pattern create = Pattern.compile("(\\d)->(\\d)");
-		Pattern delete = Pattern.compile("(\\d)X(\\d)");
 		Matcher matcher;
 		counter = 1;
 		while (sc.hasNext()) {
 			String line = sc.next();
 			System.out.println(line);
+		  matcher = process.matcher(line);
+			if (matcher.find()) {
+				int nodeId = Integer.parseInt(matcher.group(1));
+				Node n = nMap.get(nodeId);
+				n.processMsg();
+			}
 			matcher = create.matcher(line);
 			if (matcher.find()) {
 				createLink(matcher);
@@ -104,6 +111,33 @@ public class Main {
 		}
 	}
 
+  private static void doMessage(String str) {
+    Matcher match = process.matcher(str);
+    if (match.find()) {
+      int nodeId = Integer.parseInt(match.group(1));
+      Node n = nMap.get(nodeId);
+      n.processMsg();
+
+    }
+    match=create.matcher(str);
+    if(match.find()){
+      createLink(match);
+    }
+    match=delete.matcher(str);
+    if(match.find()){
+      int from = Integer.parseInt(match.group(1));
+      int to = Integer.parseInt(match.group(2));
+      if (nMap.containsKey(from)) {
+        if (nMap.containsKey(to)) {
+          Node nFrom = nMap.get(from);
+          if (nFrom.outMap.containsKey(to)) {
+            nFrom.deleteLink(to);
+          }
+        }
+      }
+    }
+  }
+
 	private static void processConsole(Scanner sc) throws IOException,
 			Exception {
 
@@ -116,9 +150,6 @@ public class Main {
 		} else {
 			str = "refresh";
 		}
-		Pattern process = Pattern.compile("(\\d)P");
-		Pattern create = Pattern.compile("(\\d)->(\\d)");
-		Pattern delete = Pattern.compile("(\\d)X(\\d)");
 		Matcher match;
 		System.out.println(str);
 		while (!str.equals("exit")) {
