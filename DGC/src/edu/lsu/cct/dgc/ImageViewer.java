@@ -135,7 +135,7 @@ public class ImageViewer extends JFrame {
 		getContentPane().add(jLabel, BorderLayout.CENTER);
 		getContentPane().setBackground(Color.white);
 		pack();
-		setLocationRelativeTo(null);
+		//setLocationRelativeTo(null);
 		setAlwaysOnTop(true);
 		setVisible(true);
 	}

@@ -1,6 +1,7 @@
 package edu.lsu.cct.dgc;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -17,10 +18,14 @@ import java.util.regex.Pattern;
 import javax.swing.JFrame;
 
 public class Main {
+	final static Pattern process = Pattern.compile("(\\d)P");
+	final static Pattern create = Pattern.compile("(\\d)->(\\d)");
+	final static Pattern delete = Pattern.compile("(\\d)X(\\d)");
+  final static String PROMPT = "$> ";
 	static int cidcounter = 0;
 	static Node anchor = new Node(0);
 	static HashMap<Integer, Node> nMap = new HashMap<Integer, Node>();
-	static String dotlocation = "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
+	static String dotlocation = File.separatorChar == '/' ? "/usr/bin/dot" : "C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe";
 	static ImageViewer iv;
 	public static HashMap<Integer, String> pic = new HashMap<Integer, String>();
 	static String fName;
@@ -39,21 +44,30 @@ public class Main {
 	    return dir.delete();
 	}
 	public static void main(String[] args) throws Exception {
-		System.out.println("Enter the file name:");
-		Scanner sc = new Scanner(System.in);
-		fName = sc.next();
+    Scanner sc = null;
+    if(args.length == 0) {
+      System.out.println("Enter the file name:");
+      sc = new Scanner(System.in);
+      fName = sc.next();
+    } else {
+      fName = args[0];
+    }
 		File fi = new File(fName);
 		File fo = new File(fName + "-out");
 		deleteDir(fo);
 		sc = new Scanner(fi);
 		nMap.put(0, anchor);
-		Pattern create = Pattern.compile("(\\d)->(\\d)");
-		Pattern delete = Pattern.compile("(\\d)X(\\d)");
 		Matcher matcher;
 		counter = 1;
 		while (sc.hasNext()) {
 			String line = sc.next();
 			System.out.println(line);
+		  matcher = process.matcher(line);
+			if (matcher.find()) {
+				int nodeId = Integer.parseInt(matcher.group(1));
+				Node n = nMap.get(nodeId);
+				n.processMsg();
+			}
 			matcher = create.matcher(line);
 			if (matcher.find()) {
 				createLink(matcher);
@@ -83,7 +97,6 @@ public class Main {
 
 	private static void display(String fName, int counter) throws IOException,
 			Exception {
-		// System.out.println("counter"+counter);
 		printer(fName + "-out", counter);
 		if (iv == null) {
 			iv = new ImageViewer(pic.get(counter));
@@ -98,20 +111,45 @@ public class Main {
 		}
 	}
 
+  private static void doMessage(String str) {
+    Matcher match = process.matcher(str);
+    if (match.find()) {
+      int nodeId = Integer.parseInt(match.group(1));
+      Node n = nMap.get(nodeId);
+      n.processMsg();
+
+    }
+    match=create.matcher(str);
+    if(match.find()){
+      createLink(match);
+    }
+    match=delete.matcher(str);
+    if(match.find()){
+      int from = Integer.parseInt(match.group(1));
+      int to = Integer.parseInt(match.group(2));
+      if (nMap.containsKey(from)) {
+        if (nMap.containsKey(to)) {
+          Node nFrom = nMap.get(from);
+          if (nFrom.outMap.containsKey(to)) {
+            nFrom.deleteLink(to);
+          }
+        }
+      }
+    }
+  }
+
 	private static void processConsole(Scanner sc) throws IOException,
 			Exception {
 
 		String str;
 		if (auto == 0) {
 			sc = new Scanner(System.in);
-			System.out.println("$>");
+			System.out.print(PROMPT);
+      System.out.flush();
 			str = sc.next();
 		} else {
 			str = "refresh";
 		}
-		Pattern process = Pattern.compile("(\\d)P");
-		Pattern create = Pattern.compile("(\\d)->(\\d)");
-		Pattern delete = Pattern.compile("(\\d)X(\\d)");
 		Matcher match;
 		System.out.println(str);
 		while (!str.equals("exit")) {
@@ -149,12 +187,14 @@ public class Main {
 			}
 			display(fName, counter);
 			if (auto != 1) {
-				System.out.println("$>");
+				System.out.print(PROMPT);
+        System.out.flush();
 				str = sc.next();
 				System.out.println(str);
 			}
 
 		}
+    System.exit(0);
 	}
 
 	private static String pickRandom() {
@@ -202,14 +242,14 @@ public class Main {
 				theDir.mkdir();
 				result = true;
 			} catch (SecurityException se) {
-				// handle it
+        se.printStackTrace();
 			}
 			// if (result) {
 			// System.out.println("DIR created");
 			// }
 		}
 		// System.out.println(theDir.getAbsolutePath());
-		PrintWriter wr = new PrintWriter(str + "\\" + str + "_gv" + count
+		PrintWriter wr = new PrintWriter(str + File.separatorChar + str + "_gv" + count
 				+ ".gv", "UTF-8");
 		wr.println("Digraph G {");
 		for (Entry<Integer, Node> entry : nMap.entrySet()) {
@@ -218,27 +258,34 @@ public class Main {
 		wr.println("}");
 		wr.close();
 
-		String cmd = dotlocation + "-Tjpg " + theDir.getAbsolutePath() + "\\"
+		String cmd = dotlocation + "-Tjpg " + theDir.getAbsolutePath() + File.separatorChar
 				+ str + "_gv" + count + ".gv " + "-o "
-				+ theDir.getAbsolutePath() + "\\" + str + "_gv" + count
+				+ theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
 				+ ".jpg";
 		// System.out.println(cmd);
-		ProcessBuilder pb = new ProcessBuilder(dotlocation, "-Tjpg",
-				theDir.getAbsolutePath() + "\\" + str + "_gv" + count + ".gv ",
-				"-o", theDir.getAbsolutePath() + "\\" + str + "_gv" + count
-						+ ".jpg");
+
+    String[] pbargs = new String[]{dotlocation,"-Tjpg",
+				theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count + ".gv",
+				"-o", theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count + ".jpg"};
+
+		ProcessBuilder pb = new ProcessBuilder(pbargs);
 		pb.redirectErrorStream(true);
 		pb.directory(theDir.getAbsoluteFile());
 		Process process = pb.start();
-		File picf = new File(theDir.getAbsolutePath() + "\\" + str + "_gv"
+		File picf = new File(theDir.getAbsolutePath() + File.separatorChar + str + "_gv"
 				+ count + ".jpg");
+    InputStream in = process.getInputStream();
+    byte[] buf = new byte[512];
 		while (true) {
+      int n = in.read(buf,0,buf.length);
+      if(n > 0)
+        System.out.write(buf,0,n);
 			if (picf.exists())
 				break;
 		}
 
 		pic.remove(count - 1);
-		pic.put(count, theDir.getAbsolutePath() + "\\" + str + "_gv" + count
+		pic.put(count, theDir.getAbsolutePath() + File.separatorChar + str + "_gv" + count
 				+ ".jpg");
 		// for (Entry<Integer, String> entry : pic.entrySet()) {
 		// System.out.println(entry.getKey() + "->" + entry.getValue());
