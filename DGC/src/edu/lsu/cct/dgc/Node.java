@@ -33,13 +33,13 @@ public class Node {
 
 	}
 
-	public String getState(int x){
-		switch(x){
+	public String getState(int x) {
+		switch (x) {
 		case 0:
 			return "CL";
 		case 1:
 			return "CO";
-		case 2: 
+		case 2:
 			return "CD";
 		case 3:
 			return "TR";
@@ -53,32 +53,42 @@ public class Node {
 			return null;
 		}
 	}
-	public String getoutMap(){
-		StringBuffer str=new StringBuffer("");
+
+	public String getoutMap() {
+		StringBuffer str = new StringBuffer("");
 		if (outMap.size() > 0) {
 			for (Integer i : outMap.keySet()) {
 				Link l = outMap.get(i);
-				str.append("("+l.to+",w="+l.which+",p="+l.p+")");
+				str.append("(" + l.to + ",w=" + l.which + ",p=" + l.p + ")");
 			}
 		}
 		return str.toString();
 	}
-	public String getStash(){
-		StringBuffer str=new StringBuffer("");
+
+	public String getStash() {
+		StringBuffer str = new StringBuffer("");
 		if (stash.size() > 0) {
 			for (Link l : stash) {
-				str.append("("+l.to+",w="+l.which+",p="+l.p+")");
+				str.append("(" + l.to + ",w=" + l.which + ",p=" + l.p + ")");
 			}
 		}
 		return str.toString();
 	}
-	public String getRC(){
-		return String.valueOf(rc[which])+","+String.valueOf(rc[1-which])+","+String.valueOf(rc[2]);
+
+	public String getRC() {
+		return String.valueOf(rc[which]) + "," + String.valueOf(rc[1 - which])
+				+ "," + String.valueOf(rc[2]);
 	}
-	public void print(){
-		String str=id+":"+getState(state)+"::w="+which+"::rc="+getRC()+"::d="+String.valueOf(d)+"::cid="+String.valueOf(cid)+"::parent="+parent+"::msgsent="+msgsent+"::link="+getoutMap()+"::stash="+getStash()+"::qu"+qu.size();
+
+	public void print() {
+		String str = id + ":" + getState(state) + "::w=" + which + "::rc="
+				+ getRC() + "::d=" + String.valueOf(d) + "::cid="
+				+ String.valueOf(cid) + "::parent=" + parent + "::msgsent="
+				+ msgsent + "::link=" + getoutMap() + "::stash=" + getStash()
+				+ "::qu" + qu.size();
 		System.out.println(str);
 	}
+
 	public void addLink(Node toNode, int to) {
 		int from = id;
 		if (state == CL) {
@@ -92,8 +102,7 @@ public class Node {
 				Main.nMap.get(from).outMap.put(to, l);
 
 			}
-		}
-		else{
+		} else {
 			toNode.rc[1 - toNode.which]++;
 			Link l = new Link(to, 1 - toNode.which);
 			Main.nMap.get(from).outMap.put(to, l);
@@ -256,7 +265,7 @@ public class Node {
 	public void processRD(Msg m) {
 		if (m.cid == cid) {
 			msgsent--;
-			System.out.println("Ndoe id"+id+" msg sent"+msgsent);
+			System.out.println("Ndoe id" + id + " msg sent" + msgsent);
 			if (msgsent == 0) {
 				if (state == RS) {
 					Msg mn = new Msg(Msg.TD);
@@ -342,6 +351,7 @@ public class Node {
 				Msg mn = new Msg(Msg.RD);
 				mn.to = m.from;
 				mn.from = id;
+				mn.cid=cid;
 				Main.nMap.get(mn.to).qu.add(mn);
 			} else {
 				state = R;
@@ -405,6 +415,7 @@ public class Node {
 						mn.from = id;
 						mn.parent = id;
 						mn.cid = cid;
+					
 						Node toNode = Main.nMap.get(l.to);
 						toNode.qu.add(mn);
 
@@ -480,7 +491,7 @@ public class Node {
 								msgsent++;
 							}
 						} else {
-							state=TD;
+							state = TD;
 							Msg mn = new Msg(Msg.TD);
 							mn.from = id;
 							mn.to = parent;
@@ -489,7 +500,7 @@ public class Node {
 						}
 
 					} else {
-						state=TD;
+						state = TD;
 						Msg mn = new Msg(Msg.TD);
 						mn.from = id;
 						mn.to = parent;
@@ -503,7 +514,7 @@ public class Node {
 
 	private void processTR(Msg m) {
 		if (rc[which] == 0 && rc[2] > 0 && state == CD && cid == m.cid) {
-			if(m.from!=parent){
+			if (m.from != parent) {
 				Msg mn = new Msg(Msg.TD);
 				mn.from = id;
 				mn.to = m.from;
@@ -512,7 +523,7 @@ public class Node {
 				return;
 			}
 			state = TR;
-			boolean x =false;
+			boolean x = false;
 			if (outMap.size() > 0) {
 				for (Integer i : outMap.keySet()) {
 					Link l = outMap.get(i);
@@ -524,10 +535,10 @@ public class Node {
 					toNode.qu.add(mn);
 					msgsent++;
 				}
-				x=true;
-			} 
-			if(stash.size()>0){
-				for(Link l:stash){
+				x = true;
+			}
+			if (stash.size() > 0) {
+				for (Link l : stash) {
 					Msg mn = new Msg(Msg.TR);
 					mn.to = l.to;
 					mn.from = id;
@@ -536,9 +547,9 @@ public class Node {
 					toNode.qu.add(mn);
 					msgsent++;
 				}
-				x=true;
+				x = true;
 			}
-			if(!x && (outMap.size()==0 || stash.size()==0) && parent!=id) {
+			if (!x && (outMap.size() == 0 || stash.size() == 0) && parent != id) {
 				Msg mn = new Msg(Msg.TD);
 				mn.from = id;
 				mn.to = parent;
@@ -554,7 +565,7 @@ public class Node {
 			Main.nMap.get(mn.to).qu.add(mn);
 		} else if (rc[which] > 0 && state == CD && cid == m.cid) {
 			System.out.println("recovery procedure!");
-			if(m.from!=parent){
+			if (m.from != parent) {
 				Msg mn = new Msg(Msg.TD);
 				mn.from = id;
 				mn.to = m.from;
@@ -596,9 +607,15 @@ public class Node {
 					state = CD;
 					if (rc[which] > 0) {
 						System.out.println("send recover message to itself!");
+						Msg mt = new Msg(Msg.R);
+						mt.from=id;
+						mt.to = parent;
+						Node toNode = Main.nMap.get(parent);
+						toNode.qu.add(mt);
+						msgsent++;
 					} else if (rc[2] > 0) {
 						Msg mn = new Msg(Msg.TR);
-						mn.from=parent;
+						mn.from = parent;
 						mn.to = id;
 						mn.cid = cid;
 						qu.add(mn);
@@ -690,7 +707,7 @@ public class Node {
 	}
 
 	public void processDL(Msg m) {
-		System.out.println("processed message!");
+		System.out.println("processed message!"+m.which+",,"+which);
 		if (state == CL) {
 			if (m.which == which) {
 				rc[which]--;
@@ -718,7 +735,31 @@ public class Node {
 						msgsent++;
 					}
 				}
+				else{
+					msgsent++;
+					Msg mt = new Msg(Msg.CD);
+					mt.to=parent;
+					Node toNode = Main.nMap.get(parent);
+					toNode.qu.add(mt);
+				}
 
+			}
+			if (rc[which] == 0 && rc[1 - which] == 0 && rc[2] == 0) {
+				// delete all the nodes under it
+				for (Integer i : outMap.keySet()) {
+					Link lt = outMap.get(i);
+					int to = lt.to;
+					Node toNode = Main.nMap.get(lt.to);
+					Msg mr = new Msg(Msg.DL);
+					//Link l = outMap.get(to);
+					outMap.remove(to);
+					mr.which = lt.which;
+					mr.p = lt.p;
+					mr.to = lt.to;
+					toNode.qu.add(mr);
+				}
+				d=1;
+				outMap.clear();
 			}
 		} else if (state == CO || state == CD) {
 			if (m.which == which) {
