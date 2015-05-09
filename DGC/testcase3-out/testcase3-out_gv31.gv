@@ -1,0 +1,17 @@
+Digraph G {
+0->4;
+edge [color=red];
+1->2;
+edge [color=black];
+edge [color=red];
+2->4;
+edge [color=black];
+edge [color=yellow];
+2->"3M";
+edge [color=black];
+edge [color=yellow];
+"3M"->4;
+edge [color=black];
+"3M";
+4->1;
+}

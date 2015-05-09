@@ -1,0 +1,7 @@
+Digraph G {
+0->4[style=dotted];
+"1M"->2;
+2->3;
+3->4;
+4->"1M"[style=dotted];
+}
