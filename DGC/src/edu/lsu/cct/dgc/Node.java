@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import edu.lsu.cct.dgc.Link;
 
 public class Node {
 	public static final int CL = 0;
@@ -346,6 +347,11 @@ public class Node {
 				mn.which = which;
 				Main.nMap.get(mn.to).qu.add(mn);
 			}
+			if(state==TD){
+				if(parent!=m.from) {
+						parent=m.from;
+				}
+			}
 			if (parent != m.from) {
 				System.out.println("sent RD msg back");
 				Msg mn = new Msg(Msg.RD);
@@ -660,9 +666,7 @@ public class Node {
 	}
 
 	private void processPHCL(Msg m) {
-		state = CO;
-		parent = m.parent;
-		cid = m.cid;
+		
 		if (which == m.which) {
 			rc[which]--;
 			rc[2]++;
@@ -673,10 +677,13 @@ public class Node {
 		if (rc[which] > 0) {
 			Msg mn = new Msg(Msg.CD);
 			mn.from = id;
-			mn.to = parent;
-			mn.cid = cid;
+			mn.to = m.from;
+			mn.cid = m.cid;
 			Main.nMap.get(mn.to).qu.add(mn);
 		} else {
+			state = CO;
+			cid = m.cid;
+			parent = m.parent;
 			if (rc[1 - which] > 0) {
 				System.out.println("changing weak to strong");
 				which = 1 - which;

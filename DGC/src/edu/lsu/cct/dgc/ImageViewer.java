@@ -78,56 +78,56 @@ public class ImageViewer extends JFrame {
 			System.exit(1);
 		}
 
-		file.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-//				System.out.println("action cleared!" + current + "..."
-//						+ Main.pic.size());
-				if (current > 1) {
-					try {
-						image = ImageIO.read(new File(Main.pic.get(--current)));
-					}
-
-					catch (Exception er) {
-						er.printStackTrace();
-						System.exit(1);
-					}
-
-					ImageIcon imageIcon = new ImageIcon(image);
-
-					jLabel.setIcon(imageIcon);
-					jLabel.repaint();
-					SwingUtilities.updateComponentTreeUI(jLabel);
-//					System.out.println("pic changed!");
-				}
-			}
-		});
-
-		next.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-//				System.out.println("action cleared! next" + current + "..."
-//						+ Main.pic.size());
-				if (current < Main.pic.size()) {
-					try {
-						image = ImageIO.read(new File(Main.pic.get(++current)));
-					}
-
-					catch (Exception er) {
-						er.printStackTrace();
-						System.exit(1);
-					}
-					ImageIcon imageIcon = new ImageIcon(image);
-
-					jLabel.setIcon(imageIcon);
-					jLabel.repaint();
-					SwingUtilities.updateComponentTreeUI(jLabel);
-//					System.out.println("pic changed!");
-				}
-			}
-		});
+//		file.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+////				System.out.println("action cleared!" + current + "..."
+////						+ Main.pic.size());
+//				if (current > 1) {
+//					try {
+//						image = ImageIO.read(new File(Main.pic.get(--current)));
+//					}
+//
+//					catch (Exception er) {
+//						er.printStackTrace();
+//						System.exit(1);
+//					}
+//
+//					ImageIcon imageIcon = new ImageIcon(image);
+//
+//					jLabel.setIcon(imageIcon);
+//					jLabel.repaint();
+//					SwingUtilities.updateComponentTreeUI(jLabel);
+////					System.out.println("pic changed!");
+//				}
+//			}
+//		});
+//
+//		next.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+////				System.out.println("action cleared! next" + current + "..."
+////						+ Main.pic.size());
+//				if (current < Main.pic.size()) {
+//					try {
+//						image = ImageIO.read(new File(Main.pic.get(++current)));
+//					}
+//
+//					catch (Exception er) {
+//						er.printStackTrace();
+//						System.exit(1);
+//					}
+//					ImageIcon imageIcon = new ImageIcon(image);
+//
+//					jLabel.setIcon(imageIcon);
+//					jLabel.repaint();
+//					SwingUtilities.updateComponentTreeUI(jLabel);
+////					System.out.println("pic changed!");
+//				}
+//			}
+//		});
 		ImageIcon imageIcon = new ImageIcon(image);
 		jLabel.setIcon(imageIcon);
 		jLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));

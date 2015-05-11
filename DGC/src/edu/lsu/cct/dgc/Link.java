@@ -1,6 +1,6 @@
 package edu.lsu.cct.dgc;
 
-public class Link {
+public class Link{
 	int to;
 	int which;
 	int p;
